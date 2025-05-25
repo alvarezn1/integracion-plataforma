@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
+TRANSBANK_COMMERCE_CODE = '597055555532'
+TRANSBANK_API_KEY = 'XNNF6A0fJ1N8FTvVJH8z8jZ2mI6R0s4e'
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -30,6 +32,9 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
+
+
+LOGIN_REDIRECT_URL = '/'
 
 INSTALLED_APPS = [
     'django.contrib.admin',
