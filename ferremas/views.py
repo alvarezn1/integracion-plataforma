@@ -12,14 +12,19 @@ from transbank.webpay.webpay_plus.transaction import Transaction
 from transbank.common.integration_type import IntegrationType
 
 import uuid
+import mercadopago
+from django.conf import settings
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import redirect
+
+from django.shortcuts import render, redirect
 
 
-# Opciones para la integración Transbank Webpay Plus
-TRANSACTION_OPTIONS = {
-    "commerce_code": "597055555532",
-    "api_key": "XNNF6A0fJ1N8FTvVJH8z8jZ2mI6R0s4e",
-    "integration_type": IntegrationType.TEST
-}
+
+
+
 
 
 class CustomLoginView(LoginView):
@@ -79,5 +84,46 @@ def eliminar_carrito(request, producto_id):
         del carrito[str(producto_id)]
     request.session['carrito'] = carrito
     return redirect('ver_carrito')
+
+
+def pago_view(request):
+    return render(request, 'ferremas/pago.html')
+
+def crear_preferencia(request):
+    sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
+
+    carrito = request.session.get('carrito', {})
+    items_mp = []
+
+    for prod_id, cantidad in carrito.items():
+        producto = get_object_or_404(Producto, pk=prod_id)
+        items_mp.append({
+            "title": producto.nombre,
+            "quantity": cantidad,
+            "unit_price": float(producto.precio)
+        })
+
+    if not items_mp:
+        return JsonResponse({"error": "El carrito está vacío"}, status=400)
+
+    preference_data = {
+        "items": items_mp,
+        "back_urls": {
+    "success": "https://tu-dominio.com/gracias",
+    "failure": "https://tu-dominio.com/error",
+    "pending": "https://tu-dominio.com/pendiente"
+},
+        "auto_return": "approved"
+    }
+
+    preference_response = sdk.preference().create(preference_data)
+    preference = preference_response.get("response", {})
+
+    if 'id' not in preference:
+        return JsonResponse({"error": "No se encontró 'id' en la respuesta de preferencia"}, status=500)
+
+    return JsonResponse({"id": preference["id"]})
+
+
 
 

@@ -12,6 +12,8 @@ urlpatterns = [
     path('login/', CustomLoginView.as_view(), name='login'),
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('register/', register, name='register'),
-
+    path('crear-preferencia/', views.crear_preferencia, name='crear_preferencia'),
+    
+    
 
 ]

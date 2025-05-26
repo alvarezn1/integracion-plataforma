@@ -13,8 +13,13 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
-TRANSBANK_COMMERCE_CODE = '597055555532'
-TRANSBANK_API_KEY = 'XNNF6A0fJ1N8FTvVJH8z8jZ2mI6R0s4e'
+WEBPAY_COMMERCE_CODE = '597055555532'  # Código de integración
+WEBPAY_API_KEY = '597055555532'        # Mismo en integración
+WEBPAY_ENVIRONMENT = 'integration'     # O 'production'
+
+# settings.py
+MERCADO_PAGO_ACCESS_TOKEN = "TEST-6513142704080382-052600-45ac5ff09ec6a1793e655f8f4cd770af-1891151382"
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
