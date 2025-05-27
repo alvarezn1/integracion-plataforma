@@ -11,15 +11,16 @@
 
 <nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
   <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'inicio' %}">Ferremas</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03"
       aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <a class="navbar-brand" href="{% url 'inicio' %}">Ferremas</a>
+
     <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{% url 'productos' %}">Productos</a>
+          <a class="nav-link active" href="{% url 'productos' %}">Productos</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'ver_carrito' %}">🛒 Carrito</a>
@@ -36,48 +37,49 @@
 <h1 class="text-center my-4">Tu carrito</h1>
 
 <div class="container">
-    {% if productos %}
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Cantidad</th>
-                    <th>Subtotal</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for producto in productos %}
-                    <tr>
-                        <td>{{ producto.nombre }}</td>
-                        <td>{{ producto.cantidad }}</td>
-                        <td>${{ producto.subtotal }}</td>
-                        <td><a href="{% url 'eliminar_carrito' producto.id %}" class="btn btn-danger">Eliminar</a></td>
-                    </tr>
-                {% endfor %}
-                <tr>
-                    <td colspan="2"><strong>Total:</strong></td>
-                    <td><strong>${{ total }}</strong></td>
-                    <td></td>
-                </tr>
-            </tbody>
-        </table>
+  {% if productos %}
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Producto</th>
+          <th>Cantidad</th>
+          <th>Subtotal</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for producto in productos %}
+          <tr>
+            <td>{{ producto.nombre }}</td>
+            <td>{{ producto.cantidad }}</td>
+            <td>${{ producto.subtotal }}</td>
+            <td>
+              <a href="{% url 'eliminar_carrito' producto.id %}" class="btn btn-danger">Eliminar</a>
+            </td>
+          </tr>
+        {% endfor %}
+        <tr>
+          <td colspan="2"><strong>Total:</strong></td>
+          <td><strong>${{ total }}</strong></td>
+          <td></td>
+        </tr>
+      </tbody>
+    </table>
 
-        <!-- Contenedor del botón Mercado Pago -->
-        <div id="button_container" class="my-4"></div>
+    <!-- Contenedor del botón Mercado Pago -->
+    <div id="button_container" class="my-4 text-center"></div>
 
-    {% else %}
-        <p>No tienes productos en el carrito.</p>
-    {% endif %}
+  {% else %}
+    <p class="text-center">No tienes productos en el carrito.</p>
+  {% endif %}
 </div>
 
+<!-- Mercado Pago Script -->
 <script>
-  // Tu clave pública de Mercado Pago (modo prueba)
-  const mp = new MercadoPago("TEST-66230095-c731-48c4-ba97-4f4b9fcbc320", {
+  const mp = new MercadoPago("APP_USR-3d13849f-bb30-4947-a351-465857f055e3", {
     locale: "es-CL"
   });
 
-  // Solo intentar crear preferencia si hay productos
   {% if productos %}
     fetch("{% url 'crear_preferencia' %}")
       .then(response => response.json())
@@ -89,16 +91,18 @@
             },
             render: {
               container: "#button_container",
-              label: "Pagar Ahora",
+              label: "Pagar Ahora"
             }
           });
         } else {
-          document.getElementById("button_container").innerText = "Error al cargar el botón de pago.";
+          document.getElementById("button_container").innerHTML = `
+            <div class="alert alert-danger">Error al generar la preferencia de pago.</div>`;
         }
       })
       .catch(error => {
         console.error("Error al crear preferencia:", error);
-        document.getElementById("button_container").innerText = "Error al cargar el botón de pago.";
+        document.getElementById("button_container").innerHTML = `
+          <div class="alert alert-danger">Error al conectar con Mercado Pago.</div>`;
       });
   {% endif %}
 </script>

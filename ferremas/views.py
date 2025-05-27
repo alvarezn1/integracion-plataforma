@@ -41,7 +41,9 @@ def lista_productos(request):
 
 
 def login_view(request):
+    print(settings.MERCADO_PAGO_ACCESS_TOKEN)
     return render(request, 'ferremas/login.html')
+
 
 
 def register(request):
@@ -85,6 +87,15 @@ def eliminar_carrito(request, producto_id):
     request.session['carrito'] = carrito
     return redirect('ver_carrito')
 
+def gracias(request):
+    return render(request, 'ferremas/gracias.html')
+
+def error(request):
+    return render(request, 'ferremas/error.html')
+
+def pendiente(request):
+    return render(request, 'ferremas/pendiente.html')
+
 
 def pago_view(request):
     return render(request, 'ferremas/pago.html')
@@ -98,9 +109,10 @@ def crear_preferencia(request):
     for prod_id, cantidad in carrito.items():
         producto = get_object_or_404(Producto, pk=prod_id)
         items_mp.append({
-            "title": producto.nombre,
+            "title": f"{producto.nombre} (ID: {producto.id})",  # título único
             "quantity": cantidad,
-            "unit_price": float(producto.precio)
+            "unit_price": float(producto.precio),
+            "currency_id": "CLP"
         })
 
     if not items_mp:
@@ -109,12 +121,17 @@ def crear_preferencia(request):
     preference_data = {
         "items": items_mp,
         "back_urls": {
-    "success": "https://tu-dominio.com/gracias",
-    "failure": "https://tu-dominio.com/error",
-    "pending": "https://tu-dominio.com/pendiente"
-},
-        "auto_return": "approved"
+            "success": "https://2b4f-201-241-4-239.ngrok-free.app/gracias/",
+            "failure": "https://2b4f-201-241-4-239.ngrok-free.app/error/",
+            "pending": "https://2b4f-201-241-4-239.ngrok-free.app/pendiente/"
+        },
+        "auto_return": "approved",
+        "payer": {
+            "email": "test_user_1492597836@testuser.com"
+        }
     }
+
+   
 
     preference_response = sdk.preference().create(preference_data)
     preference = preference_response.get("response", {})
@@ -123,7 +140,3 @@ def crear_preferencia(request):
         return JsonResponse({"error": "No se encontró 'id' en la respuesta de preferencia"}, status=500)
 
     return JsonResponse({"id": preference["id"]})
-
-
-
-

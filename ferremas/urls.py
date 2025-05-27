@@ -13,6 +13,9 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
     path('register/', register, name='register'),
     path('crear-preferencia/', views.crear_preferencia, name='crear_preferencia'),
+    path('gracias/', views.gracias, name='gracias'),
+    path('error/', views.error, name='error'),
+    path('pendiente/', views.pendiente, name='pendiente'),
     
     
 
