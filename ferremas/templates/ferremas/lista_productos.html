@@ -10,45 +10,104 @@
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            margin: 2rem;
+            margin: 2rem 0;
         }
+
         .card {
             margin: 1rem;
             width: 250px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease-in-out;
         }
+
+        .card:hover {
+            transform: scale(1.03);
+        }
+
         .card img {
             height: 200px;
             object-fit: cover;
+            border-top-left-radius: 10px;
+            border-top-right-radius: 10px;
+        }
+
+        .navbar-brand img {
+            border-radius: 50%;
+        }
+
+        form.logout-form {
+            display: inline;
+        }
+
+        form.logout-form button {
+            border: none;
+            background: none;
+            padding: 0;
+            margin: 0;
+            color: white;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        @media (max-width: 576px) {
+            .card-container {
+                flex-direction: column;
+                align-items: center;
+            }
         }
     </style>
 </head>
 <body>
 
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="#">Ferremas</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item">
-          <a class="nav-link active" aria-current="page" href="{% url 'inicio' %}">Inicio</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="{% url 'productos' %}">Productos</a>
-        </li>
-        <li class="nav-item">
-  <a class="nav-link" href="{% url 'ver_carrito' %}">🛒 Carrito</a>
-</li>
-      </ul>
-      <form class="d-flex" role="search">
-        <input class="form-control me-2" type="search" placeholder="Buscar" aria-label="Buscar">
-        <button class="btn btn-outline-success" type="submit">Buscar</button>
-      </form>
+<nav class="navbar navbar-expand-lg bg-danger navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'inicio' %}">
+            <img src="{% static 'img/logo.png' %}" alt="Logo Ferremas" width="40" height="40" class="me-2">
+            <span class="fw-bold">Ferremas</span>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'inicio' %}">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="{% url 'productos' %}">Productos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'ver_carrito' %}">🛒 Carrito</a>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <form method="POST" action="{% url 'logout' %}" class="logout-form">
+                            {% csrf_token %}
+                            <button class="nav-link">Cerrar sesión</button>
+                        </form>
+                    </li>
+                    {% if user.is_staff %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/admin/">Administrar</a>
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'register' %}">Registrarse</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
 
 <!-- Contenido de productos -->
@@ -60,11 +119,11 @@
             <div class="card">
                 <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
                 <div class="card-body">
-                <h5 class="card-title">{{ producto.nombre }}</h5>
-                <p class="card-text">{{ producto.descripcion }}</p>
-                <p class="card-text"><strong>${{ producto.precio }}</strong></p>
-                <a href="{% url 'agregar_carrito' producto.id %}" class="btn btn-primary mt-2">Agregar al carrito 🛒</a>
-</div>
+                    <h5 class="card-title">{{ producto.nombre }}</h5>
+                    <p class="card-text">{{ producto.descripcion }}</p>
+                    <p class="card-text"><strong>${{ producto.precio }}</strong></p>
+                    <a href="{% url 'agregar_carrito' producto.id %}" class="btn btn-primary w-100 mt-2">Agregar al carrito 🛒</a>
+                </div>
             </div>
         {% empty %}
             <p class="text-center">No hay productos disponibles.</p>

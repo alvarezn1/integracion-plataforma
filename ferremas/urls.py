@@ -10,12 +10,13 @@ urlpatterns = [
     path('carrito/', views.ver_carrito, name='ver_carrito'),
     path('eliminar_carrito/<int:producto_id>/', views.eliminar_carrito, name='eliminar_carrito'),
     path('login/', CustomLoginView.as_view(), name='login'),
-    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
+    path('logout/', LogoutView.as_view(next_page='inicio'), name='logout'),
     path('register/', register, name='register'),
     path('crear-preferencia/', views.crear_preferencia, name='crear_preferencia'),
     path('gracias/', views.gracias, name='gracias'),
     path('error/', views.error, name='error'),
     path('pendiente/', views.pendiente, name='pendiente'),
+    path('tasa-cambio/', views.tasa_cambio, name='tasa_cambio'),
     
     
 

@@ -8,8 +8,7 @@ from django.contrib.auth.views import LoginView
 from .models import Producto
 from .forms import CustomUserCreationForm
 
-from transbank.webpay.webpay_plus.transaction import Transaction
-from transbank.common.integration_type import IntegrationType
+
 
 import uuid
 import mercadopago
@@ -22,6 +21,9 @@ from django.shortcuts import redirect
 from django.shortcuts import render, redirect
 
 
+import requests
+
+API_KEY = '70b1ae962c7551b79305d5a6'
 
 
 
@@ -64,7 +66,7 @@ def agregar_carrito(request, producto_id):
     request.session['carrito'] = carrito
     return redirect('productos')
 
-
+@login_required
 def ver_carrito(request):
     carrito = request.session.get('carrito', {})
     productos = []
@@ -77,7 +79,11 @@ def ver_carrito(request):
         total += producto.subtotal
         productos.append(producto)
 
-    return render(request, 'ferremas/carrito.html', {'productos': productos, 'total': total})
+    # Aquí defines la tasa de cambio (puedes actualizarla o sacar de API)
+    tasa_cambio = 938  # Ejemplo: 800 CLP = 1 USD
+    total_usd = round(total / tasa_cambio, 2) if total else 0
+
+    return render(request, 'ferremas/carrito.html', {'productos': productos, 'total': total, 'total_usd': total_usd})
 
 
 def eliminar_carrito(request, producto_id):
@@ -140,3 +146,18 @@ def crear_preferencia(request):
         return JsonResponse({"error": "No se encontró 'id' en la respuesta de preferencia"}, status=500)
 
     return JsonResponse({"id": preference["id"]})
+
+
+
+def tasa_cambio(request):
+    url = f"https://v6.exchangerate-api.com/v6/{API_KEY}/latest/USD"
+    response = requests.get(url)
+    data = response.json()
+
+    # Obtener CLP por ejemplo
+    tasa_clp = data['conversion_rates'].get('CLP', None)
+
+    return JsonResponse({
+        'base': 'USD',
+        'CLP': tasa_clp
+    })
