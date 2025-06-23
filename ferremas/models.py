@@ -9,6 +9,7 @@ class Producto(models.Model):
     precio = models.DecimalField(max_digits=10, decimal_places=2)
     imagen = models.ImageField(upload_to='productos/')
     tipo = models.CharField(max_length=50)  # Ej: herramientas-manuales, materiales, etc.
+    stock = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.nombre

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required,user_passes_test
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import login as auth_login, logout as auth_logout, authenticate
@@ -8,7 +8,8 @@ from django.contrib.auth.views import LoginView
 from .models import Producto
 from .forms import CustomUserCreationForm
 
-
+from .models import Producto
+from .forms import StockUpdateForm
 
 import uuid
 import mercadopago
@@ -22,6 +23,7 @@ from django.shortcuts import render, redirect
 
 
 import requests
+from .decorators import group_required
 
 API_KEY = '70b1ae962c7551b79305d5a6'
 
@@ -34,8 +36,13 @@ class CustomLoginView(LoginView):
 
 
 def inicio(request):
-    return render(request, 'ferremas/inicio.html')
-
+    user = request.user
+    es_bodeguero = user.groups.filter(name="Bodeguero").exists() if user.is_authenticated else False
+    es_contador = user.groups.filter(name="Contador").exists() if user.is_authenticated else False
+    return render(request, 'ferremas/inicio.html', {
+        'es_bodeguero': es_bodeguero,
+        'es_contador': es_contador,
+    })
 
 def lista_productos(request):
     productos = Producto.objects.all()
@@ -161,3 +168,37 @@ def tasa_cambio(request):
         'base': 'USD',
         'CLP': tasa_clp
     })
+
+
+
+
+def es_bodeguero(user):
+    return user.groups.filter(name='Bodeguero').exists()
+@group_required("Bodeguero")
+@user_passes_test(es_bodeguero)
+def gestionar_stock(request):
+    productos = Producto.objects.all()
+    if request.method == 'POST':
+        for producto in productos:
+            nuevo_stock = request.POST.get(f'stock_{producto.id}')
+            if nuevo_stock is not None:
+                producto.stock = int(nuevo_stock)
+                producto.save()
+        return redirect('gestionar_stock')
+    
+    return render(request, 'ferremas/gestionar_stock.html', {'productos': productos})
+
+
+def es_contador(user):
+    return user.groups.filter(name='Contador').exists()
+
+@group_required("Contador")
+def transacciones_contador(request):
+    sdk = mercadopago.SDK(settings.MERCADO_PAGO_ACCESS_TOKEN)
+
+    # Obtener las últimas 10 transacciones (puedes ajustar el límite)
+    result = sdk.payment().search({"limit": 10, "sort": "date_created", "criteria": "desc"})
+
+    pagos = result["response"]["results"]
+
+    return render(request, 'ferremas/transacciones_contador.html', {'pagos': pagos})

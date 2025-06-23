@@ -17,6 +17,9 @@ urlpatterns = [
     path('error/', views.error, name='error'),
     path('pendiente/', views.pendiente, name='pendiente'),
     path('tasa-cambio/', views.tasa_cambio, name='tasa_cambio'),
+    path('bodega/stock/', views.gestionar_stock, name='gestionar_stock'),
+    path('contador/transacciones/', views.transacciones_contador, name='transacciones_contador'),
+
     
     
 
