@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 from pathlib import Path
 import os
 
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 
 # settings.py
